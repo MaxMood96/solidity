@@ -1,7 +1,10 @@
 ### 0.9.0 (unreleased)
 
 Breaking changes:
+ * Disallow ``.pop()`` on arrays containing nested mappings.
+ * Disallow ``delete`` on types that contain nested mappings.
  * Inline Assembly: Consider functions, function parameters and return variables for shadowing checks.
+ * ``error`` is now a keyword that can only be used for defining errors.
 
 
 ### 0.8.8 (unreleased)
