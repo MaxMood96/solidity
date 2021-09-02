@@ -34,6 +34,7 @@
 #include <libyul/backends/evm/EVMDialect.h>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string/replace.hpp>
+#include <boost/algorithm/string/predicate.hpp>
 #include <cctype>
 #include <vector>
 #include <regex>
@@ -2057,7 +2058,8 @@ bool Parser::variableDeclarationStart()
 optional<string> Parser::findLicenseString(std::vector<ASTPointer<ASTNode>> const& _nodes)
 {
 	// We circumvent the scanner here, because it skips non-docstring comments.
-	static regex const licenseRegex("SPDX-License-Identifier:\\s*([a-zA-Z0-9 ()+.-]+)");
+	static regex const licenseRegexStrict("^([a-zA-Z0-9 ()+.-]+)$");
+	static regex const licenseRegex("SPDX-License-Identifier:\\s*([^\n]+)");
 
 	// Search inside all parts of the source not covered by parsed nodes.
 	// This will leave e.g. "global comments".
@@ -2076,16 +2078,39 @@ optional<string> Parser::findLicenseString(std::vector<ASTPointer<ASTNode>> cons
 	for (auto const& [start, end]: sequencesToSearch)
 	{
 		smatch match;
-		if (regex_search(start, end, match, licenseRegex))
+		auto words_begin =
+			std::sregex_iterator(start, end, licenseRegex);
+		auto words_end = std::sregex_iterator();
+
+		for (std::sregex_iterator i = words_begin; i != words_end; ++i)
 		{
-			string license{boost::trim_copy(string(match[1]))};
-			if (!license.empty())
+			std::smatch match = *i;
+			if (!match.empty())
+			{
+				string license{string(match[1])};
+				// Remove trailing comment terminator if present
+				if (boost::algorithm::ends_with(license, "*/"))
+					license = license.substr(0, license.size() - 2);
+
+				license = boost::trim_copy(license);
+
 				matches.emplace_back(std::move(license));
+			}
 		}
 	}
 
 	if (matches.size() == 1)
-		return matches.front();
+	{
+		string const& license = matches.front();
+		if (regex_search(license.begin(), license.end(), licenseRegexStrict))
+			return license;
+		else
+			parserError(
+				1114_error,
+				{-1, -1, m_scanner->currentLocation().sourceName},
+				"Invalid SPDX license identifier."
+			);
+	}
 	else if (matches.empty())
 		parserWarning(
 			1878_error,

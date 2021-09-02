@@ -18,6 +18,7 @@ Bugfixes:
  * SMTChecker: Fix false positive in external calls from constructors.
  * SMTChecker: Fix internal error on some multi-source uses of ``abi.*``, cryptographic functions and constants.
  * Type Checker: Disallow modifier declarations and definitions in interfaces.
+ * Parser: Properly check for multiple SPDX license indentifiers and validate them.
 
 
 
