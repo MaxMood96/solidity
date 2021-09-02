@@ -815,8 +815,7 @@ jobs:
     steps:
       - when:
           condition: true
-          <<: *steps_soltest
-      - run: *run_cmdline_tests
+          <<: *steps_cmdline_tests
       - run: *gitter_notify_failure
 
   t_ems_solcjs:
