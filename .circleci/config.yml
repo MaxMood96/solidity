@@ -804,25 +804,20 @@ jobs:
     docker:
       - image: << pipeline.parameters.ubuntu-2004-clang-docker-image >>
     steps:
-      - checkout
-      - attach_workspace:
-          at: build
-      - run: *run_soltest
+      - when:
+          condition: true
+          <<: *steps_soltest
       - run: *gitter_notify_failure
-      - store_test_results: *store_test_results
-      - store_artifacts: *artifacts_test_results
 
   t_ubu_ubsan_clang_cli:
     docker:
       - image: << pipeline.parameters.ubuntu-2004-clang-docker-image >>
     steps:
-      - checkout
-      - attach_workspace:
-          at: build
+      - when:
+          condition: true
+          <<: *steps_soltest
       - run: *run_cmdline_tests
       - run: *gitter_notify_failure
-      - store_test_results: *store_test_results
-      - store_artifacts: *artifacts_test_results
 
   t_ems_solcjs:
     docker:
