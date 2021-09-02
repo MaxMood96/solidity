@@ -80,7 +80,7 @@ void CHC::analyze(SourceUnit const& _source)
 			m_noSolverWarning = true;
 			m_errorReporter.warning(
 				7649_error,
-				SourceLocation(),
+				_source.location(),
 				"CHC analysis was not possible since no Horn solver was enabled."
 			);
 		}
@@ -99,7 +99,7 @@ void CHC::analyze(SourceUnit const& _source)
 	for (auto const* source: sources)
 		source->accept(*this);
 
-	checkVerificationTargets();
+	checkVerificationTargets(_source);
 
 	bool ranSolver = true;
 	// If ranSolver is true here it's because an SMT solver callback was
@@ -111,7 +111,7 @@ void CHC::analyze(SourceUnit const& _source)
 		m_noSolverWarning = true;
 		m_errorReporter.warning(
 			3996_error,
-			SourceLocation(),
+			_source.location(),
 #ifdef HAVE_Z3_DLOPEN
 			"CHC analysis was not possible since libz3.so." + to_string(Z3_MAJOR_VERSION) + "." + to_string(Z3_MINOR_VERSION) + " was not found."
 #else
@@ -1588,7 +1588,7 @@ void CHC::verificationTargetEncountered(
 	m_context.addAssertion(errorFlag().currentValue() == previousError);
 }
 
-void CHC::checkVerificationTargets()
+void CHC::checkVerificationTargets(SourceUnit const& _source)
 {
 	// The verification conditions have been collected per function where they have been encountered (m_verificationTargets).
 	// Also, all possible contexts in which an external function can be called has been recorded (m_queryPlaceholders).
@@ -1684,7 +1684,7 @@ void CHC::checkVerificationTargets()
 	if (!m_settings.showUnproved && !m_unprovedTargets.empty())
 		m_errorReporter.warning(
 			5840_error,
-			{},
+			_source.location(),
 			"CHC: " +
 			to_string(m_unprovedTargets.size()) +
 			" verification condition(s) could not be proved." +

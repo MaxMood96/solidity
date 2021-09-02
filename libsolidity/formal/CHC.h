@@ -251,7 +251,7 @@ private:
 
 	void verificationTargetEncountered(ASTNode const* const _errorNode, VerificationTargetType _type, smtutil::Expression const& _errorCondition);
 
-	void checkVerificationTargets();
+	void checkVerificationTargets(SourceUnit const& _source);
 	// Forward declaration. Definition is below.
 	struct CHCVerificationTarget;
 	void checkAssertTarget(ASTNode const* _scope, CHCVerificationTarget const& _target);

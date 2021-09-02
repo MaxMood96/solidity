@@ -68,7 +68,7 @@ void BMC::analyze(SourceUnit const& _source, map<ASTNode const*, set<Verificatio
 			m_noSolverWarning = true;
 			m_errorReporter.warning(
 				7710_error,
-				SourceLocation(),
+				_source.location(),
 				"BMC analysis was not possible since no SMT solver was found and enabled."
 			);
 		}
@@ -91,7 +91,7 @@ void BMC::analyze(SourceUnit const& _source, map<ASTNode const*, set<Verificatio
 	if (m_unprovedAmt > 0 && !m_settings.showUnproved)
 		m_errorReporter.warning(
 			2788_error,
-			{},
+			_source.location(),
 			"BMC: " +
 			to_string(m_unprovedAmt) +
 			" verification condition(s) could not be proved." +
@@ -114,7 +114,7 @@ void BMC::analyze(SourceUnit const& _source, map<ASTNode const*, set<Verificatio
 			m_noSolverWarning = true;
 			m_errorReporter.warning(
 				8084_error,
-				SourceLocation(),
+				_source.location(),
 				"BMC analysis was not possible. No SMT solver (Z3 or CVC4) was available."
 				" None of the installed solvers was enabled."
 #ifdef HAVE_Z3_DLOPEN
