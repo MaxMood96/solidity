@@ -1,5 +1,8 @@
 ### 0.8.32 (unreleased)
 
+Important Bugfixes:
+* Code Generator: Fix a bug in clearing/copying of arrays that straddle the end of storage, potentially resulting in assignment/initialization/`delete`/`push()`/`pop()` skipping some or all of the intended storage writes.
+
 Language Features:
 
 Compiler Features:
@@ -7,6 +10,7 @@ Compiler Features:
 Bugfixes:
 * Codegen: Fix internal compiler error when emitting events via module member access.
 * TypeChecker: Fix error and event selectors not being considered compile-time constant.
+* TypeChecker: Fix `string.concat` and `bytes.concat` with constant arguments not being considered compile-time constant.
 
 
 ### 0.8.31 (2025-12-03)

@@ -3271,11 +3271,28 @@ bool TypeChecker::visit(MemberAccess const& _memberAccess)
 	// TODO some members might be pure, but for example `address(0x123).balance` is not pure
 	// although every subexpression is, so leaving this limited for now.
 	if (auto tt = dynamic_cast<TypeType const*>(exprType))
+	{
 		if (
 			tt->actualType()->category() == Type::Category::Enum ||
 			tt->actualType()->category() == Type::Category::UserDefinedValueType
 		)
 			annotation.isPure = true;
+
+		// `concat` purity depends also on its arguments, but this is checked later, in visit(FunctionCall...)
+		// This covers `bytes.concat` and `string.concat`.
+		if (tt->actualType()->category() == Type::Category::Array)
+		{
+			if (
+				auto const* funcType = dynamic_cast<FunctionType const*>(annotation.type);
+				funcType &&
+				(
+					funcType->kind() == FunctionType::Kind::StringConcat ||
+					funcType->kind() == FunctionType::Kind::BytesConcat
+				)
+			)
+				annotation.isPure = true;
+		}
+	}
 	if (
 		auto const* functionType = dynamic_cast<FunctionType const*>(exprType);
 		functionType &&
@@ -3391,6 +3408,16 @@ bool TypeChecker::visit(MemberAccess const& _memberAccess)
 
 	if (!annotation.isPure.set())
 		annotation.isPure = false;
+
+	if (
+		auto const* funcType = dynamic_cast<FunctionType const*>(annotation.type);
+		funcType &&
+		funcType->kind() != FunctionType::Kind::Declaration &&
+		funcType->kind() != FunctionType::Kind::Internal &&
+		funcType->kind() != FunctionType::Kind::Error &&
+		funcType->kind() != FunctionType::Kind::Event
+	)
+		solAssert(funcType->isPure() == *annotation.isPure);
 
 	return false;
 }
